@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Adrescontrole Gemeente Kerkrade</title>
+
+<style>
+
+/* BASIS */
+body {
+  font-family: Calibri, Arial, sans-serif;
+  background-color: #EDEDED;
+  margin: 0;
+}
+
+/* HEADER */
+.header {
+  background-color: white;
+  padding: 15px 30px;
+  border-bottom: 4px solid #A71921;
+  display: flex;
+  align-items: center;
+}
+
+.header img {
+  height: 50px;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 6px;
+}
+
+/* TITEL */
+h2 {
+  color: #A71921;
+}
+
+/* LABELS */
+label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* INPUT */
+input {
+  width: 95%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+input:invalid {
+  border: 2px solid #A71921;
+}
+
+/* BUTTON */
+button {
+  width: 100%;
+  padding: 14px;
+  background-color: #A71921;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #7f141a;
+}
+
+/* RESULT */
+.result {
+  margin-top: 30px;
+}
+
+/* MELDINGEN */
+.badge {
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.success {
+  background-color: #FBF3F3;
+}
+
+.error {
+  background-color: #FBF3F3;
+}
+
+.warning {
+  background-color: #004B6C;
+  color: white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <img src="https://cuatro.sim-cdn.nl/kerkrade/uploads/styles/logo/media/logo_gemeente_kerkrade.png?cb=1bquAGhm">
+</div>
+
+<div class="container">
+
+<h2>Controleer uw adres</h2>
+
+<label>Straat</label>
+<input id="straat" placeholder="Bijv. Akerstraat">
+
+<label>Huisnummer</label>
+<input type="number" id="nummer" placeholder="Bijv. 70">
+
+<label>Postcode</label>
+<input id="postcode" placeholder="Bijv. 6466HC">
+
+<button type="button" onclick="checkAdres()">Controleer</button>
+
+<div id="resultaat" class="result"></div>
+
+</div>
+
+<script>
+
+/* ✅ JOUW DATA KOMT HIER */
+const data = [
+{postcode:"6466 HC", straat:"Akerstraat", van:65, tot:91},
+{postcode:"6466 HD", straat:"Akerstraat", van:93, tot:149},
+{postcode:"6466 HE", straat:"Akerstraat", van:129, tot:157},
+{postcode:"6466 HG", straat:"Akerstraat", van:159, tot:193},
+{postcode:"6466 HK", straat:"Akerstraat", van:68, tot:68},
+{postcode:"6466 HM", straat:"Akerstraat", van:92, tot:118},
+{postcode:"6466 HP", straat:"Akerstraat", van:162, tot:174},
+{postcode:"6466 SV", straat:"Anemonenstraat", van:1, tot:23},
+{postcode:"6466 SZ", straat:"Anemonenstraat", van:16, tot:18},
+{postcode:"6466 VT", straat:"Aster", van:3, tot:14},
+{postcode:"6466 TL", straat:"Chrysantstraat", van:1, tot:39},
+{postcode:"6466 EP", straat:"Coumansstraat", van:1, tot:24},
+{postcode:"6466 TH", straat:"Crocusstraat", van:1, tot:32},
+{postcode:"6466 TJ", straat:"Geraniumstraat", van:1, tot:3},
+{postcode:"6466 TK", straat:"Geraniumstraat", van:2, tot:42},
+{postcode:"6466 TM", straat:"Gladiolenstraat", van:1, tot:1},
+{postcode:"6466 TR", straat:"Gladiolenstraat", van:143, tot:149},
+{postcode:"6466 TS", straat:"Gladiolenstraat", van:151, tot:179},
+{postcode:"6466 TT", straat:"Gladiolenstraat", van:40, tot:52},
+{postcode:"6466 TZ", straat:"Gladiolenstraat", van:2, tot:216},
+{postcode:"6466 CE", straat:"Heiluststraat", van:1, tot:77},
+{postcode:"6466 CG", straat:"Heiluststraat", van:51, tot:75},
+{postcode:"6466 CH", straat:"Heiluststraat", van:2, tot:48},
+{postcode:"6466 CJ", straat:"Heiluststraat", van:50, tot:108},
+{postcode:"6466 EM", straat:"Holzbroekstraat", van:1, tot:25},
+{postcode:"6466 RW", straat:"Hyacintstraat", van:7, tot:55},
+{postcode:"6466 RX", straat:"Hyacintstraat", van:4, tot:30},
+{postcode:"6466 RZ", straat:"Hyacintstraat", van:32, tot:60},
+{postcode:"6466 ST", straat:"Jasmijnstraat", van:1, tot:8},
+{postcode:"6466 AE", straat:"Kaalheidersteenweg", van:193, tot:349},
+{postcode:"6466 AE", straat:"Kaalheidersteenweg", van:134, tot:172},
+{postcode:"6466 BP", straat:"Kampstraat", van:3, tot:33},
+{postcode:"6466 BR", straat:"Kampstraat", van:35, tot:81},
+{postcode:"6466 BS", straat:"Kampstraat", van:83, tot:103},
+{postcode:"6466 BT", straat:"Kampstraat", van:137, tot:177},
+{postcode:"6466 BV", straat:"Kampstraat", van:6, tot:38},
+{postcode:"6466 BW", straat:"Kampstraat", van:48, tot:114},
+{postcode:"6466 BX", straat:"Kampstraat", van:124, tot:176},
+{postcode:"6466 BE", straat:"Kasperenstraat", van:45, tot:79},
+{postcode:"6466 BG", straat:"Kasperenstraat", van:81, tot:107},
+{postcode:"6466 BH", straat:"Kasperenstraat", van:121, tot:181},
+{postcode:"6466 BM", straat:"Kasperenstraat", van:78, tot:128},
+{postcode:"6466 EA", straat:"Kleingraverstraat", van:7, tot:57},
+{postcode:"6466 EB", straat:"Kleingraverstraat", van:63, tot:123},
+{postcode:"6466 EG", straat:"Kleingraverstraat", van:36, tot:62},
+{postcode:"6466 EH", straat:"Kleingraverstraat", van:64, tot:98},
+{postcode:"6466 EJ", straat:"Kleingraverstraat", van:100, tot:124},
+{postcode:"6466 VP", straat:"Lavendel", van:6, tot:17},
+{postcode:"6466 SB", straat:"Lupinestraat", van:1, tot:37},
+{postcode:"6466 SC", straat:"Lupinestraat", van:83, tot:103},
+{postcode:"6466 SE", straat:"Lupinestraat", van:109, tot:131},
+{postcode:"6466 SG", straat:"Lupinestraat", van:133, tot:177},
+{postcode:"6466 SH", straat:"Lupinestraat", van:2, tot:34},
+{postcode:"6466 SK", straat:"Lupinestraat", van:78, tot:124},
+{postcode:"6466 SL", straat:"Lupinestraat", van:126, tot:156},
+{postcode:"6466 SM", straat:"Lupinestraat", van:140, tot:198},
+{postcode:"6466 RT", straat:"Narcisstraat", van:1, tot:45},
+{postcode:"6466 RV", straat:"Narcisstraat", van:2, tot:38},
+{postcode:"6466 CA", straat:"Ons Limburgstraat", van:5, tot:61},
+{postcode:"6466 CB", straat:"Ons Limburgstraat", van:67, tot:85},
+{postcode:"6466 CC", straat:"Ons Limburgstraat", van:2, tot:60},
+{postcode:"6466 CD", straat:"Ons Limburgstraat", van:62, tot:86},
+{postcode:"6466 ER", straat:"Oude Heilust", van:2, tot:40},
+{postcode:"6466 ES", straat:"Oude Heilust", van:1, tot:17},
+{postcode:"6466 VN", straat:"Papaverplein", van:110, tot:121},
+{postcode:"6466 CW", straat:"Pastoor Vaessenstraat", van:1, tot:47},
+{postcode:"6466 CK", straat:"Romeinenstraat", van:1, tot:27},
+{postcode:"6466 CL", straat:"Romeinenstraat", van:41, tot:85},
+{postcode:"6466 CM", straat:"Romeinenstraat", van:2, tot:28},
+{postcode:"6466 CN", straat:"Romeinenstraat", van:30, tot:90},
+{postcode:"6466 VM", straat:"Salviaplein", van:105, tot:109},
+{postcode:"6466 RR", straat:"Salviastraat", van:1, tot:23},
+{postcode:"6466 RS", straat:"Salviastraat", van:2, tot:32},
+{postcode:"6466 EN", straat:"Schifferheidestraat", van:1, tot:170},
+{postcode:"6466 CR", straat:"Sophiastraat", van:3, tot:27},
+{postcode:"6466 CS", straat:"Sophiastraat", van:2, tot:28},
+{postcode:"6466 SN", straat:"Spireastraat", van:7, tot:49},
+{postcode:"6466 SP", straat:"Spireastraat", van:51, tot:59},
+{postcode:"6466 SR", straat:"Spireastraat", van:10, tot:126},
+{postcode:"6466 EL", straat:"Uilstraat", van:1, tot:18},
+{postcode:"6466 CT", straat:"Van de Weijerstraat", van:9, tot:28},
+{postcode:"6466 CP", straat:"Willem-Sophiaplein", van:1, tot:12},
+{postcode:"6466 VX", straat:"Anjelierstraat", van:1, tot:47},
+{postcode:"6466 VR", straat:"Begoniastraat", van:2, tot:32},
+{postcode:"6467 AV", straat:"Berthradisstraat", van:5, tot:57},
+{postcode:"6467 AW", straat:"Berthradisstraat", van:4, tot:36},
+{postcode:"6467 AX", straat:"Berthradisstraat", van:38, tot:62},
+{postcode:"6467 AK", straat:"Burg. Franssenstraat", van:1, tot:47},
+{postcode:"6467 AL", straat:"Burg. Franssenstraat", van:2, tot:38},
+{postcode:"6467 AM", straat:"Burg. Franssenstraat", van:40, tot:66},
+{postcode:"6467 AT", straat:"Conventuelenstraat", van:1, tot:16},
+{postcode:"6466 XA", straat:"Dahliastraat", van:1, tot:29},
+{postcode:"6466 XB", straat:"Dahliastraat", van:37, tot:53},
+{postcode:"6466 XD", straat:"Dahliastraat", van:2, tot:40},
+{postcode:"6466 XE", straat:"Dahliastraat", van:42, tot:58},
+{postcode:"6467 BK", straat:"de Lingestraat", van:1, tot:34},
+{postcode:"6466 XG", straat:"Eglantierstraat", van:1, tot:35},
+{postcode:"6466 BB", straat:"Ericastraat", van:1, tot:23},
+{postcode:"6466 BC", straat:"Ericastraat", van:2, tot:28},
+{postcode:"6466 WD", straat:"Fresiaplein", van:1, tot:19},
+{postcode:"6467 AZ", straat:"Grasweide", van:1, tot:44},
+{postcode:"6466 AJ", straat:"Heihof", van:1, tot:18},
+{postcode:"6466 AX", straat:"Heiveldplein", van:1, tot:25},
+{postcode:"6466 AZ", straat:"Heiveldplein", van:26, tot:51},
+{postcode:"6466 AG", straat:"Heiveldstraat", van:11, tot:61},
+{postcode:"6466 AH", straat:"Heiveldstraat", van:67, tot:97},
+{postcode:"6466 AJ", straat:"Heiveldstraat", van:101, tot:147},
+{postcode:"6466 AK", straat:"Heiveldstraat", van:2, tot:44},
+{postcode:"6466 AL", straat:"Heiveldstraat", van:56, tot:82},
+{postcode:"6466 AM", straat:"Heiveldstraat", van:90, tot:136},
+{postcode:"6466 XM", straat:"Irisstraat", van:1, tot:12},
+{postcode:"6466 MA", straat:"John Erkensstraat", van:1, tot:40},
+{postcode:"6466 AA", straat:"Kaalheidersteenweg", van:1, tot:59},
+{postcode:"6466 AB", straat:"Kaalheidersteenweg", van:79, tot:131},
+{postcode:"6466 AC", straat:"Kaalheidersteenweg", van:133, tot:161},
+{postcode:"6466 AD", straat:"Kaalheidersteenweg", van:163, tot:183},
+{postcode:"6467 AA", straat:"Kaalheidersteenweg", van:6, tot:28},
+{postcode:"6467 AB", straat:"Kaalheidersteenweg", van:30, tot:88},
+{postcode:"6467 AC", straat:"Kaalheidersteenweg", van:90, tot:102},
+{postcode:"6467 AD", straat:"Kaalheidersteenweg", van:106, tot:132},
+{postcode:"6466 AT", straat:"Kapelweg", van:5, tot:33},
+{postcode:"6466 AV", straat:"Kapelweg", van:2, tot:58},
+{postcode:"6466 BD", straat:"Kasperenstraat", van:9, tot:41},
+{postcode:"6466 BJ", straat:"Kasperenstraat", van:8, tot:38},
+{postcode:"6466 BK", straat:"Kasperenstraat", van:40, tot:60},
+{postcode:"6466 BL", straat:"Kasperenstraat", van:62, tot:76},
+{postcode:"6466 BN", straat:"Kasperenstraat", van:7, tot:176},
+{postcode:"6466 EE", straat:"Kleingraverstraat", van:2, tot:32},
+{postcode:"6466 AN", straat:"Krichelbergsweg", van:15, tot:39},
+{postcode:"6466 AP", straat:"Krichelbergsweg", van:2, tot:38},
+{postcode:"6466 AR", straat:"Krichelstraat", van:1, tot:37},
+{postcode:"6466 AS", straat:"Krichelstraat", van:2, tot:42},
+{postcode:"6466 XN", straat:"Leliestraat", van:31, tot:51},
+{postcode:"6466 XP", straat:"Leliestraat", van:2, tot:50},
+{postcode:"6466 VS", straat:"Meidoornstraat", van:1, tot:17},
+{postcode:"6466 BA", straat:"Parkstraat", van:1, tot:19},
+{postcode:"6466 AV", straat:"Pater Kolbeweg", van:5, tot:5},
+{postcode:"6467 BD", straat:"Renierstraat", van:1, tot:16},
+{postcode:"6466 VV", straat:"Rozenstraat", van:15, tot:35},
+{postcode:"6466 VW", straat:"Rozenstraat", van:20, tot:32},
+{postcode:"6467 BE", straat:"Seghemanstraat", van:1, tot:15},
+{postcode:"6467 BG", straat:"Seghemanstraat", van:17, tot:53},
+{postcode:"6467 BH", straat:"Seghemanstraat", van:2, tot:30},
+{postcode:"6467 BJ", straat:"Seghemanstraat", van:34, tot:64},
+{postcode:"6466 XL", straat:"Seringenstraat", van:1, tot:27},
+{postcode:"6466 AW", straat:"Sportstraat", van:4, tot:30},
+{postcode:"6467 AN", straat:"St. Jozefstraat", van:1, tot:39},
+{postcode:"6467 AP", straat:"St. Jozefstraat", van:41, tot:71},
+{postcode:"6467 AR", straat:"St. Jozefstraat", van:2, tot:40},
+{postcode:"6467 AS", straat:"St. Jozefstraat", van:42, tot:72},
+{postcode:"6467 BR", straat:"Strijthagenweg", van:123, tot:159},
+{postcode:"6467 BA", straat:"Struverstraat", van:5, tot:17},
+{postcode:"6467 BB", straat:"Struverstraat", van:2, tot:24},
+{postcode:"6467 BC", straat:"Struverstraat", van:26, tot:72},
+{postcode:"6466 XH", straat:"Tulpenstraat", van:1, tot:39},
+{postcode:"6466 XJ", straat:"Tulpenstraat", van:21, tot:55},
+{postcode:"6466 XK", straat:"Tulpenstraat", van:2, tot:40},
+{postcode:"6467 BL", straat:"Van Dietrichsteinstraat", van:1, tot:14},
+{postcode:"6466 EZ", straat:"Vauputsweg", van:171, tot:173},
+{postcode:"6467 BM", straat:"Winricusstraat", van:5, tot:45},
+{postcode:"6467 BN", straat:"Winricusstraat", van:10, tot:30},
+{postcode:"6467 BP", straat:"Winricusstraat", van:32, tot:74},
+{postcode:"6463 CH", straat:"Chevremontstraat", van:1, tot:43},
+{postcode:"6463 CJ", straat:"Chevremontstraat", van:51, tot:75},
+{postcode:"6463 CK", straat:"Chevremontstraat", van:2, tot:52},
+{postcode:"6463 CC", straat:"Chevremontstraat", van:54, tot:88},
+{postcode:"6463 XJ", straat:"Clausstraat", van:1, tot:22},
+{postcode:"6463 BV", straat:"Colenstraat", van:1, tot:30},
+{postcode:"6463 XL", straat:"Emmastraat", van:1, tot:26},
+{postcode:"6463 XM", straat:"Erensteinerstraat", van:1, tot:35},
+{postcode:"6463 XN", straat:"Erensteinerstraat", van:41, tot:115},
+{postcode:"6463 XP", straat:"Erensteinerstraat", van:6, tot:44},
+{postcode:"6463 XR", straat:"Erensteinerstraat", van:46, tot:108},
+{postcode:"6463 CM", straat:"Heiligenhuisstraat", van:4, tot:29},
+{postcode:"6463 PA", straat:"Hertenweide", van:1, tot:28},
+{postcode:"6463 XX", straat:"Hoog Anstel", van:1, tot:13},
+{postcode:"6463 XZ", straat:"Hoog Anstel", van:14, tot:41},
+{postcode:"6463 CG", straat:"Huynstraat", van:2, tot:11},
+{postcode:"6463 XS", straat:"Kerkvoetpad", van:2, tot:8},
+{postcode:"6463 XK", straat:"Koestraat", van:3, tot:72},
+{postcode:"6463 AR", straat:"Nassaustraat", van:9, tot:27},
+{postcode:"6463 AS", straat:"Nassaustraat", van:29, tot:125},
+{postcode:"6463 AT", straat:"Nassaustraat", van:2, tot:42},
+{postcode:"6463 AV", straat:"Nassaustraat", van:44, tot:64},
+{postcode:"6463 AW", straat:"Nassaustraat", van:66, tot:130},
+{postcode:"6463 KA", straat:"Pastoor de Grootstraat", van:2, tot:36},
+{postcode:"6463 KB", straat:"Pastoor de Grootstraat", van:1, tot:27},
+{postcode:"6463 BC", straat:"Poyckstraat", van:19, tot:25},
+{postcode:"6463 BE", straat:"Poyckstraat", van:81, tot:119},
+{postcode:"6463 BG", straat:"Poyckstraat", van:121, tot:159},
+{postcode:"6463 BH", straat:"Poyckstraat", van:6, tot:40},
+{postcode:"6463 AP", straat:"Prinses Beatrixstraat", van:1, tot:21},
+{postcode:"6463 BN", straat:"Prinses Irenestraat", van:3, tot:51},
+{postcode:"6463 BP", straat:"Prinses Irenestraat", van:53, tot:55},
+{postcode:"6463 BS", straat:"Prinses Irenestraat", van:2, tot:32},
+{postcode:"6463 BT", straat:"Prinses Irenestraat", van:34, tot:48},
+{postcode:"6463 BA", straat:"Prinses Margrietstraat", van:1, tot:39},
+{postcode:"6463 BB", straat:"Prinses Margrietstraat", van:2, tot:32},
+{postcode:"6463 AX", straat:"Prinses Marijkestraat", van:1, tot:12},
+{postcode:"6463 BJ", straat:"Spiesstraat", van:5, tot:38},
+{postcode:"6463 BL", straat:"Spiesstraat", van:71, tot:101},
+{postcode:"6463 BM", straat:"Spiesstraat", van:103, tot:133},
+{postcode:"6463 CP", straat:"St. Pieterstraat", van:1, tot:29},
+{postcode:"6463 CT", straat:"St. Pieterstraat", van:2, tot:40},
+{postcode:"6463 XS", straat:"Teutelebroekstraat", van:17, tot:59},
+{postcode:"6463 XT", straat:"Teutelebroekstraat", van:73, tot:127},
+{postcode:"6463 XV", straat:"Teutelebroekstraat", van:2, tot:68},
+{postcode:"6463 XW", straat:"Teutelebroekstraat", van:70, tot:128},
+{postcode:"6463 BW", straat:"Valenciahof", van:1, tot:53},
+{postcode:"6463 AZ", straat:"van Ederenstraat", van:1, tot:20},
+{postcode:"6463 CA", straat:"van Gronsveldstraat", van:1, tot:41},
+{postcode:"6463 CB", straat:"van Gronsveldstraat", van:43, tot:85},
+{postcode:"6463 CC", straat:"van Gronsveldstraat", van:2, tot:32},
+{postcode:"6463 CD", straat:"van Gronsveldstraat", van:58, tot:92},
+{postcode:"6463 CE", straat:"van Gronsveldstraat", van:94, tot:116},
+{postcode:"6463 AA", straat:"Zonstraat", van:15, tot:61},
+{postcode:"6463 AB", straat:"Zonstraat", van:67, tot:87},
+{postcode:"6461 TC", straat:"Ailbertuslaan", van:2, tot:96},
+{postcode:"6461 TD", straat:"Ailbertuslaan", van:98, tot:112},
+{postcode:"6463 TE", straat:"Ailbertuslaan", van:71, tot:101},
+{postcode:"6463 TG", straat:"Ailbertuslaan", van:103, tot:133},
+{postcode:"6463 TH", straat:"Ailbertuslaan", van:135, tot:165},
+{postcode:"6463 TJ", straat:"Ailbertuslaan", van:167, tot:197},
+{postcode:"6463 TP", straat:"Ailbertuslaan", van:327, tot:357},
+{postcode:"6463 TR", straat:"Ailbertuslaan", van:359, tot:389},
+{postcode:"6463 TS", straat:"Ailbertuslaan", van:391, tot:421},
+{postcode:"6463 TT", straat:"Ailbertuslaan", van:423, tot:453},
+{postcode:"6464 XZ", straat:"Berenbosweg", van:1, tot:15},
+{postcode:"6463 VN", straat:"Directeur Cortenstraat", van:1, tot:49},
+{postcode:"6463 VP", straat:"Directeur Cortenstraat", van:2, tot:72},
+{postcode:"6463 VD", straat:"Directeur Evertsstraat", van:1, tot:43},
+{postcode:"6463 VE", straat:"Directeur Evertsstraat", van:2, tot:46},
+{postcode:"6463 VG", straat:"Directeur Evertsstraat", van:48, tot:90},
+{postcode:"6463 VL", straat:"Directeur Geurtsstraat", van:1, tot:181},
+{postcode:"6461 TV", straat:"Directeur Jansenstraat", van:2, tot:20},
+{postcode:"6461 TR", straat:"Directeur Jochemsstraat", van:1, tot:12},
+{postcode:"6461 TS", straat:"Directeur Petersstraat", van:11, tot:38},
+{postcode:"6461 TT", straat:"Directeur Petersstraat", van:37, tot:62},
+{postcode:"6463 VK", straat:"Directeur Schrijnenstraat", van:2, tot:32},
+{postcode:"6461 TD", straat:"Directeur Stassenstraat", van:1, tot:12},
+{postcode:"6461 TW", straat:"Directeur van de Vennestraat", van:1, tot:31},
+{postcode:"6461 TX", straat:"Directeur van de Vennestraat", van:2, tot:38},
+{postcode:"6461 TZ", straat:"Directeur van de Vennestraat", van:40, tot:72},
+{postcode:"6461 RC", straat:"Gerst", van:1, tot:14},
+{postcode:"6464 DX", straat:"Graaf Saffenburgweg", van:15, tot:15},
+{postcode:"6461 RB", straat:"Graan", van:1, tot:39},
+{postcode:"6461 RD", straat:"Haver", van:1, tot:7},
+{postcode:"6461 BT", straat:"Hertogenlaan", van:10, tot:38},
+{postcode:"6461 BV", straat:"Hertogenlaan", van:31, tot:61},
+{postcode:"6461 BW", straat:"Hertogenlaan", van:63, tot:93},
+{postcode:"6463 HA", straat:"Hertogenlaan", van:95, tot:133},
+{postcode:"6463 HB", straat:"Hertogenlaan", van:135, tot:173},
+{postcode:"6463 HC", straat:"Hertogenlaan", van:175, tot:213},
+{postcode:"6463 HD", straat:"Hertogenlaan", van:215, tot:253},
+{postcode:"6463 HE", straat:"Hertogenlaan", van:255, tot:293},
+{postcode:"6463 HG", straat:"Hertogenlaan", van:295, tot:333},
+{postcode:"6463 HH", straat:"Hertogenlaan", van:335, tot:373},
+{postcode:"6463 HJ", straat:"Hertogenlaan", van:375, tot:413},
+{postcode:"6463 HK", straat:"Hertogenlaan", van:415, tot:453},
+{postcode:"6463 HL", straat:"Hertogenlaan", van:455, tot:493},
+{postcode:"6463 HK", straat:"Hertogenlaan", van:58, tot:88},
+{postcode:"6463 HM", straat:"Hertogenlaan", van:58, tot:88},
+{postcode:"6463 HN", straat:"Hertogenlaan", van:108, tot:108},
+{postcode:"6464 EP", straat:"Heyendallaan", van:52, tot:84},
+{postcode:"6461 VE", straat:"Mgr.van Gilsstraat", van:1, tot:45},
+{postcode:"6461 VG", straat:"Mgr.van Gilsstraat", van:2, tot:12},
+{postcode:"6463 TV", straat:"Mgr.van Gilsstraat", van:75, tot:103},
+{postcode:"6463 TW", straat:"Mgr.van Gilsstraat", van:124, tot:160},
+{postcode:"6463 TX", straat:"Mgr.van Gilsstraat", van:162, tot:196},
+{postcode:"6463 TZ", straat:"Mgr.van Gilsstraat", van:198, tot:234},
+{postcode:"6461 BZ", straat:"Norbertushof", van:1, tot:73},
+{postcode:"6461 BN", straat:"O.L. Vrouwestraat", van:67, tot:89},
+{postcode:"6461 BP", straat:"O.L. Vrouwestraat", van:91, tot:147},
+{postcode:"6461 BS", straat:"O.L. Vrouwestraat", van:54, tot:198},
+{postcode:"6461 SB", straat:"Pastoor Mainsstraat", van:1, tot:19},
+{postcode:"6461 VA", straat:"Prof.Cobbenhagenstraat", van:1, tot:41},
+{postcode:"6461 VB", straat:"Prof.Cobbenhagenstraat", van:43, tot:89},
+{postcode:"6461 VC", straat:"Prof.Cobbenhagenstraat", van:91, tot:107},
+{postcode:"6461 VD", straat:"Prof.Cobbenhagenstraat", van:2, tot:32},
+{postcode:"6461 RA", straat:"Rogge", van:1, tot:22},
+{postcode:"6461 VJ", straat:"Rolduckerstraat", van:51, tot:79},
+{postcode:"6461 VK", straat:"Rolduckerstraat", van:81, tot:81},
+{postcode:"6461 VL", straat:"Rolduckerstraat", van:153, tot:163},
+{postcode:"6461 VN", straat:"Rolduckerstraat", van:64, tot:108},
+{postcode:"6461 RE", straat:"Tarwe", van:1, tot:33},
+{postcode:"6463 AC", straat:"Zonstraat", van:10, tot:48},
+{postcode:"6463 AD", straat:"Zonstraat", van:50, tot:88},
+{postcode:"6463 AE", straat:"Zonstraat", van:90, tot:128},
+{postcode:"6463 AG", straat:"Zonstraat", van:130, tot:168},
+{postcode:"6463 AH", straat:"Zonstraat", van:170, tot:208},
+{postcode:"6463 AJ", straat:"Zonstraat", van:210, tot:248},
+{postcode:"6463 AK", straat:"Zonstraat", van:250, tot:288},
+{postcode:"6463 AL", straat:"Zonstraat", van:290, tot:328},
+{postcode:"6463 AM", straat:"Zonstraat", van:330, tot:368},
+{postcode:"6463 AN", straat:"Zonstraat", van:370, tot:420},
+{postcode:"6462 BZ", straat:"Aemiliaanhof", van:1, tot:20},
+{postcode:"6462 CE", straat:"Angelastraat", van:5, tot:51},
+{postcode:"6462 CG", straat:"Angelastraat", van:2, tot:36},
+{postcode:"6462 CH", straat:"Angelastraat", van:38, tot:68},
+{postcode:"6462 CJ", straat:"Barbarastraat", van:1, tot:39},
+{postcode:"6462 CK", straat:"Barbarastraat", van:2, tot:20},
+{postcode:"6462 RP", straat:"Bergstraat", van:2, tot:18},
+{postcode:"6462 RR", straat:"Bergstraat", van:1, tot:39},
+{postcode:"6462 GW", straat:"Bij de Broeders", van:2, tot:61},
+{postcode:"6462 AG", straat:"Bleijerheiderstraat", van:91, tot:115},
+{postcode:"6462 AH", straat:"Bleijerheiderstraat", van:117, tot:133},
+{postcode:"6462 AJ", straat:"Bleijerheiderstraat", van:135, tot:179},
+{postcode:"6462 AM", straat:"Bleijerheiderstraat", van:76, tot:104},
+{postcode:"6462 AN", straat:"Bleijerheiderstraat", van:108, tot:138},
+{postcode:"6462 AP", straat:"Bleijerheiderstraat", van:140, tot:152},
+{postcode:"6462 AR", straat:"Bleijerheiderstraat", van:156, tot:210},
+{postcode:"6462 GT", straat:"Bostrop", van:1, tot:51},
+{postcode:"6462 GV", straat:"Bostrop", van:53, tot:77},
+{postcode:"6462 CW", straat:"Bouwerweistraat", van:1, tot:62},
+{postcode:"6462 JA", straat:"Büttgenbachstraat", van:6, tot:28},
+{postcode:"6462 JB", straat:"Büttgenbachstraat", van:9, tot:71},
+{postcode:"6462 JC", straat:"Catharinastraat", van:2, tot:16},
+{postcode:"6462 TN", straat:"Clarastraat", van:1, tot:25},
+{postcode:"6462 TP", straat:"Clarastraat", van:2, tot:30},
+{postcode:"6462 GG", straat:"Delversweg", van:2, tot:24},
+{postcode:"6462 CS", straat:"Dr. Ackensplein", van:1, tot:38},
+{postcode:"6462 CZ", straat:"Dumontstraat", van:1, tot:14},
+{postcode:"6462 BV", straat:"Elisabethstraat", van:1, tot:37},
+{postcode:"6462 BW", straat:"Elisabethstraat", van:4, tot:36},
+{postcode:"6462 LA", straat:"Erfweg", van:2, tot:32},
+{postcode:"6462 LB", straat:"Erfweg", van:1, tot:55},
+{postcode:"6462 CL", straat:"Franciscanerstraat", van:1, tot:49},
+{postcode:"6462 CM", straat:"Franciscanerstraat", van:51, tot:83},
+{postcode:"6462 CN", straat:"Franciscanerstraat", van:6, tot:42},
+{postcode:"6462 CP", straat:"Franciscanerstraat", van:44, tot:64},
+{postcode:"6462 CR", straat:"Henri Jonasplein", van:1, tot:34},
+{postcode:"6462 CX", straat:"Hoefstraat", van:2, tot:70},
+{postcode:"6462 JE", straat:"Husmannstraat", van:1, tot:17},
+{postcode:"6462 CH", straat:"Höverstraat", van:2, tot:26},
+{postcode:"6462 TH", straat:"Jonkerbergstraat", van:2, tot:2},
+{postcode:"6462 EM", straat:"Josephinaplein", van:1, tot:10},
+{postcode:"6462 EL", straat:"Josephinastraat", van:3, tot:29},
+{postcode:"6462 EW", straat:"Kant", van:1, tot:51},
+{postcode:"6462 EX", straat:"Kant", van:53, tot:145},
+{postcode:"6462 EZ", straat:"Kant", van:2, tot:48},
+{postcode:"6462 RT", straat:"Klifstraat", van:1, tot:27},
+{postcode:"6462 RW", straat:"Klifstraat", van:2, tot:6},
+{postcode:"6462 CA", straat:"Kohlbergsgracht", van:1, tot:61},
+{postcode:"6462 CB", straat:"Kohlbergsgracht", van:71, tot:93},
+{postcode:"6462 CC", straat:"Kohlbergsgracht", van:2, tot:34},
+{postcode:"6462 CD", straat:"Kohlbergsgracht", van:36, tot:66},
+{postcode:"6462 EG", straat:"Kokelekant", van:6, tot:6},
+{postcode:"6462 ES", straat:"Kokelekant", van:10, tot:10},
+{postcode:"6462 EN", straat:"Kokelestraat", van:1, tot:85},
+{postcode:"6462 EP", straat:"Kokelestraat", van:87, tot:119},
+{postcode:"6462 ER", straat:"Kokelestraat", van:46, tot:163},
+{postcode:"6462 ES", straat:"Kokelestraat", van:2, tot:62},
+{postcode:"6462 ET", straat:"Kokelestraat", van:66, tot:98},
+{postcode:"6462 EV", straat:"Kokelestraat", van:100, tot:148},
+{postcode:"6462 BR", straat:"Lodewijkstraat", van:1, tot:33},
+{postcode:"6462 BS", straat:"Lodewijkstraat", van:35, tot:59},
+{postcode:"6462 BT", straat:"Lodewijkstraat", van:2, tot:38},
+{postcode:"6462 BX", straat:"Luchesiusstraat", van:1, tot:24},
+{postcode:"6462 HG", straat:"Mundgenstraat", van:1, tot:41},
+{postcode:"6462 TB", straat:"Nico Ploumstraat", van:1, tot:12},
+{postcode:"6462 GK", straat:"Nieuwstraat", van:3, tot:46},
+{postcode:"6462 GL", straat:"Nieuwstraat", van:58, tot:63},
+{postcode:"6462 GM", straat:"Nieuwstraat", van:66, tot:80},
+{postcode:"6462 GN", straat:"Nieuwstraat", van:81, tot:94},
+{postcode:"6462 GP", straat:"Nieuwstraat", van:97, tot:110},
+{postcode:"6462 EA", straat:"Pannesheiderstraat", van:1, tot:33},
+{postcode:"6462 EB", straat:"Pannesheiderstraat", van:37, tot:97},
+{postcode:"6462 EC", straat:"Pannesheiderstraat", van:6, tot:28},
+{postcode:"6462 ED", straat:"Pannesheiderstraat", van:30, tot:68},
+{postcode:"6462 EE", straat:"Pannesheiderstraat", van:70, tot:138},
+{postcode:"6462 GX", straat:"Pensionaatstraat", van:1, tot:72},
+{postcode:"6462 RX", straat:"Peschbeemdenstraat", van:3, tot:19},
+{postcode:"6462 RZ", straat:"Peschbeemdenstraat", van:4, tot:26},
+{postcode:"6462 BL", straat:"Pricksteenweg", van:2, tot:16},
+{postcode:"6462 BM", straat:"Pricksteenweg", van:18, tot:42},
+{postcode:"6462 BN", straat:"Pricksteenweg", van:48, tot:68},
+{postcode:"6462 BP", straat:"Pricksteenweg", van:70, tot:112},
+{postcode:"6462 GH", straat:"Schiltgen", van:1, tot:43},
+{postcode:"6462 GJ", straat:"Schiltgen", van:2, tot:42},
+{postcode:"6462 GD", straat:"Schummerstraat", van:1, tot:61},
+{postcode:"6462 GE", straat:"Schummerstraat", van:4, tot:44},
+{postcode:"6462 CT", straat:"Slakstraat", van:3, tot:59},
+{postcode:"6462 CV", straat:"Slakstraat", van:2, tot:82},
+{postcode:"6462 RV", straat:"St. Antoniusstraat", van:1, tot:23},
+{postcode:"6462 GS", straat:"Steenbos", van:1, tot:20},
+{postcode:"6462 EH", straat:"Theresiastraat", van:7, tot:49},
+{postcode:"6462 EJ", straat:"Theresiastraat", van:2, tot:38},
+{postcode:"6462 EK", straat:"Theresiastraat", van:40, tot:82},
+{postcode:"6462 TC", straat:"Thijs Wöltgensstraat", van:1, tot:49},
+{postcode:"6462 TR", straat:"Ursulastraat", van:23, tot:33},
+{postcode:"6462 TS", straat:"Ursulastraat", van:35, tot:77},
+{postcode:"6462 TZ", straat:"Ursulastraat", van:196, tot:236},
+{postcode:"6462 GZ", straat:"Vlinderheide", van:3, tot:22},
+{postcode:"6462 GA", straat:"Voccartstraat", van:1, tot:29},
+{postcode:"6462 GC", straat:"Voccartstraat", van:2, tot:36},
+{postcode:"6462 SJ", straat:"Voorterstraat", van:253, tot:253},
+{postcode:"6462 SK", straat:"Voorterstraat", van:261, tot:261},
+{postcode:"6462 SR", straat:"Voorterstraat", van:467, tot:497},
+{postcode:"6462 SV", straat:"Voorterstraat", van:68, tot:529},
+{postcode:"6462 SX", straat:"Voorterstraat", van:70, tot:114},
+{postcode:"6462 SZ", straat:"Voorterstraat", van:118, tot:152},
+{postcode:"6462 VA", straat:"Vroenstraat", van:1, tot:97},
+{postcode:"6462 VB", straat:"Vroenstraat", van:101, tot:147},
+{postcode:"6462 VC", straat:"Vroenstraat", van:201, tot:277},
+{postcode:"6462 VD", straat:"Vroenstraat", van:301, tot:377},
+{postcode:"6462 VE", straat:"Vroenstraat", van:435, tot:477},
+{postcode:"6462 VG", straat:"Vroenstraat", van:535, tot:549},
+{postcode:"6462 VH", straat:"Vroenstraat", van:635, tot:649},
+{postcode:"6462 VJ", straat:"Vroenstraat", van:735, tot:749},
+{postcode:"6462 VK", straat:"Vroenstraat", van:835, tot:849},
+{postcode:"6462 VL", straat:"Vroenstraat", van:935, tot:949},
+{postcode:"6462 XZ", straat:"Annastraat", van:46, tot:58},
+{postcode:"6462 XX", straat:"Annastraat", van:6, tot:38},
+{postcode:"6462 XW", straat:"Annastraat", van:5, tot:49},
+{postcode:"6462 HX", straat:"Athwerk", van:1, tot:22},
+{postcode:"6462 AL", straat:"Bleijerheiderstraat", van:40, tot:74},
+{postcode:"6462 AK", straat:"Bleijerheiderstraat", van:2, tot:38},
+{postcode:"6462 AE", straat:"Bleijerheiderstraat", van:59, tot:89},
+{postcode:"6462 AD", straat:"Bleijerheiderstraat", van:31, tot:57},
+{postcode:"6462 AC", straat:"Bleijerheiderstraat", van:1, tot:29},
+{postcode:"6462 AT", straat:"Bosstraat", van:2, tot:26},
+{postcode:"6462 AS", straat:"Bosstraat", van:1, tot:31},
+{postcode:"6462 AZ", straat:"Bosveldstraat", van:48, tot:94},
+{postcode:"6462 AX", straat:"Bosveldstraat", van:4, tot:46},
+{postcode:"6462 AW", straat:"Bosveldstraat", van:45, tot:103},
+{postcode:"6462 AV", straat:"Bosveldstraat", van:1, tot:43},
+{postcode:"6462 XJ", straat:"Canisiusstraat", van:26, tot:56},
+{postcode:"6462 XH", straat:"Canisiusstraat", van:2, tot:24},
+{postcode:"6462 XG", straat:"Canisiusstraat", van:1, tot:45},
+{postcode:"6462 HW", straat:"Caplei", van:1, tot:34},
+{postcode:"6462 HA", straat:"Domaniale Mijnstraat", van:25, tot:30},
+{postcode:"6462 HE", straat:"Feldbiss", van:47, tot:163},
+{postcode:"6462 HD", straat:"Feldbiss", van:27, tot:43},
+{postcode:"6462 HC", straat:"Feldbiss", van:74, tot:220},
+{postcode:"6462 HB", straat:"Feldbiss", van:2, tot:72},
+{postcode:"6462 HT", straat:"Finefrau", van:87, tot:130},
+{postcode:"6462 HS", straat:"Finefrau", van:64, tot:86},
+{postcode:"6462 HR", straat:"Finefrau", van:41, tot:63},
+{postcode:"6462 HP", straat:"Finefrau", van:1, tot:40},
+{postcode:"6462 HM", straat:"Grauweck", van:1, tot:23},
+{postcode:"6462 HL", straat:"Grauweck", van:4, tot:44},
+{postcode:"6462 SW", straat:"Groot-Nullandstraat", van:6, tot:68},
+{postcode:"6462 HV", straat:"Hemeling", van:1, tot:27},
+{postcode:"6462 AA", straat:"Kipstraat", van:40, tot:95},
+{postcode:"6462 TA", straat:"Klein-Nullandstraat", van:1, tot:27},
+{postcode:"6462 AB", straat:"Kruisstraat", van:1, tot:22},
+{postcode:"6461 HB", straat:"Kruisstraat", van:38, tot:78},
+{postcode:"6462 HJ", straat:"Leyendecker", van:1, tot:27},
+{postcode:"6462 HH", straat:"Leyendecker", van:2, tot:36},
+{postcode:"6462 XB", straat:"Maria Gorettiplein", van:1, tot:24},
+{postcode:"6462 XV", straat:"Maria Gorettistraat", van:132, tot:190},
+{postcode:"6462 XT", straat:"Maria Gorettistraat", van:106, tot:128},
+{postcode:"6462 XS", straat:"Maria Gorettistraat", van:58, tot:104},
+{postcode:"6462 XR", straat:"Maria Gorettistraat", van:2, tot:56},
+{postcode:"6462 XP", straat:"Maria Gorettistraat", van:115, tot:145},
+{postcode:"6462 XN", straat:"Maria Gorettistraat", van:93, tot:113},
+{postcode:"6462 XM", straat:"Maria Gorettistraat", van:61, tot:83},
+{postcode:"6462 XL", straat:"Maria Gorettistraat", van:13, tot:59},
+{postcode:"6462 XK", straat:"Maria Gorettistraat", van:1, tot:11},
+{postcode:"6462 GR", straat:"Nieuwstraat", van:109, tot:132},
+{postcode:"6462 GD", straat:"Nullanderstraat", van:48, tot:94},
+{postcode:"6462 GE", straat:"Nullanderstraat", van:96, tot:142},
+{postcode:"6462 GC", straat:"Nullanderstraat", van:85, tot:123},
+{postcode:"6462 GB", straat:"Nullanderstraat", van:55, tot:81},
+{postcode:"6462 BG", straat:"Oude Schachtstraat", van:2, tot:72},
+{postcode:"6462 BE", straat:"Oude Schachtstraat", van:5, tot:67},
+{postcode:"6462 VZ", straat:"Pancratiusstraat", van:44, tot:70},
+{postcode:"6462 VX", straat:"Pancratiusstraat", van:4, tot:42},
+{postcode:"6462 VW", straat:"Pancratiusstraat", van:41, tot:71},
+{postcode:"6462 VV", straat:"Pancratiusstraat", van:1, tot:39},
+{postcode:"6462 HZ", straat:"Plattewei", van:1, tot:32},
+{postcode:"6462 BK", straat:"Pricksteenweg", van:31, tot:53},
+{postcode:"6462 BJ", straat:"Pricksteenweg", van:1, tot:29},
+{postcode:"6462 BH", straat:"Reyserkuilenstraat", van:24, tot:26},
+{postcode:"6462 SN", straat:"Sandberg", van:1, tot:33},
+{postcode:"6462 HK", straat:"Senteweck", van:1, tot:22},
+{postcode:"6462 XE", straat:"Servatiusstraat", van:2, tot:46},
+{postcode:"6462 XD", straat:"Servatiusstraat", van:33, tot:51},
+{postcode:"6462 XC", straat:"Servatiusstraat", van:1, tot:31},
+{postcode:"6462 BD", straat:"Veldkuilstraat", van:4, tot:66},
+{postcode:"6462 BC", straat:"Veldkuilstraat", van:61, tot:93},
+{postcode:"6462 BB", straat:"Veldkuilstraat", van:25, tot:59},
+{postcode:"6462 BA", straat:"Veldkuilstraat", van:3, tot:23},
+{postcode:"6462 VN", straat:"Vroenstraat", van:38, tot:82},
+{postcode:"6462 VM", straat:"Vroenstraat", van:2, tot:34},
+{postcode:"6461 JL", straat:"Schleidenstraat", van:1, tot:29},
+{postcode:"6461 JM", straat:"Schleidenstraat", van:31, tot:63},
+{postcode:"6461 JN", straat:"Schleidenstraat", van:2, tot:12},
+{postcode:"6461 JP", straat:"Schleidenstraat", van:38, tot:84},
+{postcode:"6461 JR", straat:"Schleidenstraat", van:86, tot:132},
+{postcode:"6461 JS", straat:"Schleidenstraat", van:134, tot:180},
+{postcode:"6461 JT", straat:"Schleidenstraat", van:182, tot:228},
+{postcode:"6461 JV", straat:"Schleidenstraat", van:230, tot:276},
+{postcode:"6461 JW", straat:"Honéestraat", van:5, tot:61},
+{postcode:"6461 JD", straat:"Nummer II-straat", van:108, tot:118},
+{postcode:"6461 JE", straat:"Nummer II-straat", van:120, tot:166},
+{postcode:"6461 KB", straat:"Nieuwstraat", van:151, tot:181},
+{postcode:"6461 HZ", straat:"Melchiorstraat", van:4, tot:37},
+{postcode:"6461 GL", straat:"Burg. Savelberglaan", van:1, tot:75},
+{postcode:"6461 GM", straat:"Burg. Savelberglaan", van:77, tot:141},
+{postcode:"6461 GP", straat:"Burg. Savelberglaan", van:2, tot:48},
+{postcode:"6461 GR", straat:"Burg. Savelberglaan", van:50, tot:96},
+{postcode:"6461 XD", straat:"Franckstraat", van:1, tot:23},
+{postcode:"6461 XE", straat:"Franckstraat", van:25, tot:89},
+{postcode:"6461 XG", straat:"Franckstraat", van:6, tot:28},
+{postcode:"6461 XH", straat:"Franckstraat", van:30, tot:70},
+{postcode:"6461 XJ", straat:"Mucherveldstraat", van:13, tot:47},
+{postcode:"6461 XK", straat:"Mucherveldstraat", van:49, tot:83},
+{postcode:"6461 XL", straat:"Mucherveldstraat", van:85, tot:113},
+{postcode:"6461 XM", straat:"Mucherveldstraat", van:4, tot:56},
+{postcode:"6461 XN", straat:"Mucherveldstraat", van:58, tot:110},
+{postcode:"6461 XB", straat:"Lempersstraat", van:5, tot:35},
+{postcode:"6461 XC", straat:"Lempersstraat", van:6, tot:36},
+{postcode:"6461 GT", straat:"Kipstraat", van:1, tot:29},
+{postcode:"6461 GV", straat:"Kipstraat", van:31, tot:57},
+{postcode:"6461 GW", straat:"Kipstraat", van:2, tot:36},
+{postcode:"6461 XP", straat:"Deken Quodbachlaan", van:19, tot:71},
+{postcode:"6461 XS", straat:"Deken Quodbachlaan", van:10, tot:14},
+{postcode:"6471 VJ", straat:"Complex Nieuwenhagerweg", van:1, tot:37},
+{postcode:"6471 XM", straat:"Complex Willem Alexanderstraat", van:1, tot:35},
+{postcode:"6471 XN", straat:"Complex Willem Alexanderstraat", van:37, tot:71},
+{postcode:"6471 XS", straat:"Complex Waubacherweg", van:1, tot:35},
+{postcode:"6463 CR", straat:"St. Pieterstraat", van:31, tot:59},
+{postcode:"6463 CS", straat:"St. Pieterstraat", van:61, tot:93},
+{postcode:"6463 CV", straat:"St. Pieterstraat", van:42, tot:104},
+{postcode:"6463 CX", straat:"St. Pieterstraat", van:106, tot:138},
+{postcode:"6463 DA", straat:"Complex St. Pieterstraat- Akkerheide", van:2, tot:50},
+{postcode:"6463 DB", straat:"Complex St. Pieterstraat- Akkerheide", van:52, tot:60},
+{postcode:"6463 DC", straat:"Complex St. Pieterstraat- Akkerheide", van:106, tot:108},
+{postcode:"6466 HA", straat:"Akerstraat", van:1, tot:39},
+{postcode:"6466 HB", straat:"Akerstraat", van:41, tot:63},
+{postcode:"6463 HH", straat:"Akerstraat", van:2, tot:18},
+{postcode:"6466 HJ", straat:"Akerstraat", van:24, tot:48},
+{postcode:"6466 HK", straat:"Akerstraat", van:50, tot:66}
+];
+
+/* ✅ FUNCTIE */
+function checkAdres(){
+
+let postcodeInput = document.getElementById("postcode");
+let straatInput = document.getElementById("straat");
+let nummerInput = document.getElementById("nummer");
+
+let postcode = postcodeInput.value.toUpperCase().replace(/\s/g,"");
+let straat = straatInput.value.toLowerCase().trim();
+let nummer = Number(nummerInput.value);
+
+/* ✅ VALIDATIE */
+if (!postcode || !straat || !nummerInput.value) {
+  document.getElementById("resultaat").innerHTML =
+    "<div class='badge warning'> Vul alle velden in.</div>";
+  return;
+}
+
+/* ✅ POSTCODE CHECK */
+if (!/^[0-9]{4}[A-Z]{2}$/.test(postcode)) {
+  document.getElementById("resultaat").innerHTML =
+    "<div class='badge warning'>⚠️ Vul een geldige postcode in (bijv. 6466HC).</div>";
+  return;
+}
+
+/* ✅ ZOEKEN */
+let match = false;
+
+for (let i = 0; i < data.length; i++) {
+
+  let item = data[i];
+  let pc = item.postcode.toUpperCase().replace(/\s/g,"");
+
+  if (
+    pc === postcode &&
+    item.straat.toLowerCase() === straat &&
+    nummer >= item.van &&
+    nummer <= item.tot
+  ) {
+    match = true;
+    break;
+  }
+}
+
+/* ✅ RESULTAAT */
+if(match){
+  document.getElementById("resultaat").innerHTML =
+    "<div class='badge success'>✔ Dit adres valt binnen het Parkstadwet-gebied.</div>";
+} else {
+  document.getElementById("resultaat").innerHTML =
+    "<div class='badge error'>✖ Dit adres valt niet binnen het Parkstadwet-gebied.</div>";
+}
+
+}
+
+</script>
+
+</body>
+</html>
